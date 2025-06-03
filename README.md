@@ -20,15 +20,6 @@ Both should be installed and make sure mongodb is running.
 git clone https://github.com/koolkishan/chat-app-react-nodejs
 cd chat-app-react-nodejs
 ```
-Now rename env files from .env.example to .env
-```shell
-cd public
-mv .env.example .env
-cd ..
-cd server
-mv .env.example .env
-cd ..
-```
 
 Now install the dependencies
 ```shell
