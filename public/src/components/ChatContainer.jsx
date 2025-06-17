@@ -86,22 +86,25 @@ export default function ChatContainer({ currentChat, socket }) {
         <Logout />
       </div>
       <div className="chat-messages">
-        {messages.map((message) => {
-          return (
-            <div ref={scrollRef} key={uuidv4()}>
-              <div
-                className={`message ${
-                  message.fromSelf ? "sended" : "recieved"
-                }`}
-              >
-                <div className="content ">
-                  <p>{message.message}</p>
-                </div>
-              </div>
-            </div>
-          );
-        })}
+  {messages.map((message) => {
+    const isFile = typeof message.message === "string" && message.message.startsWith("/uploads/");
+    return (
+      <div ref={scrollRef} key={uuidv4()}>
+        <div className={`message ${message.fromSelf ? "sended" : "recieved"}`}>
+          <div className="content ">
+            {isFile ? (
+              <a href={`http://localhost:3001${message.message}`} target="_blank" rel="noopener noreferrer">
+                Download File
+              </a>
+            ) : (
+              <p>{message.message}</p>
+            )}
+          </div>
+        </div>
       </div>
+    );
+  })}
+</div>
       <ChatInput handleSendMsg={handleSendMsg} />
     </Container>
   );

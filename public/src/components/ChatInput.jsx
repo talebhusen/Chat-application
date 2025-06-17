@@ -3,13 +3,18 @@ import { BsEmojiSmileFill } from "react-icons/bs";
 import { IoMdSend } from "react-icons/io";
 import styled from "styled-components";
 import Picker from "emoji-picker-react";
+import axios from "axios";
+import { sendMessageRoute,host } from "../utils/APIRoutes";
+import { AiOutlinePaperClip } from "react-icons/ai";
 
 export default function ChatInput({ handleSendMsg }) {
   const [msg, setMsg] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [file, setFile] = useState(null);
   const handleEmojiPickerhideShow = () => {
     setShowEmojiPicker(!showEmojiPicker);
   };
+
 
   const handleEmojiClick = (event, emojiObject) => {
     let message = msg;
@@ -17,9 +22,22 @@ export default function ChatInput({ handleSendMsg }) {
     setMsg(message);
   };
 
-  const sendChat = (event) => {
+  const handleFileChange = (e) => {
+    setFile(e.target.files[0]);
+  };
+
+  // Handle file upload and send
+  const sendChat = async (event) => {
     event.preventDefault();
-    if (msg.length > 0) {
+    if (file) {
+      const formData = new FormData();
+      formData.append("file", file);
+      const response = await axios.post(`${host}/api/messages/upload`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      handleSendMsg(response.data.fileUrl); // send file URL as message
+      setFile(null);
+    } else if (msg.length > 0) {
       handleSendMsg(msg);
       setMsg("");
     }
@@ -33,12 +51,22 @@ export default function ChatInput({ handleSendMsg }) {
           {showEmojiPicker && <Picker onEmojiClick={handleEmojiClick} />}
         </div>
       </div>
-      <form className="input-container" onSubmit={(event) => sendChat(event)}>
+      <form className="input-container" onSubmit={sendChat}>
         <input
           type="text"
           placeholder="type your message here"
           onChange={(e) => setMsg(e.target.value)}
           value={msg}
+        />
+        {/* WhatsApp-style paperclip icon for file upload */}
+        <label htmlFor="file-upload" className="file-attach">
+          <AiOutlinePaperClip size={24} />
+        </label>
+        <input
+          id="file-upload"
+          type="file"
+          style={{ display: "none" }}
+          onChange={handleFileChange}
         />
         <button type="submit">
           <IoMdSend />
@@ -103,22 +131,31 @@ const Container = styled.div`
     border-radius: 2rem;
     display: flex;
     align-items: center;
-    gap: 2rem;
+    gap: 1rem;
     background-color: #ffffff34;
-    input {
-      width: 90%;
+    input[type="text"] {
+      width: 80%;
       height: 60%;
       background-color: transparent;
       color: white;
       border: none;
       padding-left: 1rem;
       font-size: 1.2rem;
-
       &::selection {
         background-color: #9a86f3;
       }
       &:focus {
         outline: none;
+      }
+    }
+    .file-attach {
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      color: #9a86f3;
+      margin-right: 0.5rem;
+      svg {
+        font-size: 1.7rem;
       }
     }
     button {
